@@ -2,53 +2,45 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <chrono>
 using namespace std;
 
 
 
-long counter = 0;
-void swapInt(int &a, int &b) {
-    // cout << a << '^' << b << endl;
-    a ^= b ^= a ^= b;
-    ++counter;
+template <typename it>
+void bubbleSort(it l, it r) {
+    bool s;
+    for (size_t j = 1; j < r-l; ++j, s = 0) {
+        for (it i = l; i < r-j; ++i) {
+            if (*i > *(i+1)) {
+                swap(*i, *(i+1));
+                s = 1;
+            }
+        }
+        if (!s) break;
+    }
 }
 
 
-void bubbleSort(vector<int> &vec, int l, int r) {
-    for (int j = l; j < r; ++j)
-        for (int i = l; i < r-j; ++i)
-            if (vec[i] > vec[i+1])
-                swapInt(vec[i], vec[i+1]);
-}
-
-
-void quickSort(vector<int> &vec, int l, int r) {
+template <typename it>
+void quickSort(it l, it r) {
     if (r-l < 2) return;
-    int p = vec[(l+r)/2];
-    int i = l, j = r-1;
+    auto p = *(l+(r-l)/2);
+    it i = l, j = r-1;
     while (1) {
-        while (vec[i] < p) ++i;
-        while (vec[j] > p) --j;
-        if (i < j) swapInt(vec[i++], vec[j--]);
+        while (*i < p) ++i;
+        while (*j > p) --j;
+        if (i < j) swap(*i++, *j--);
         else break;
     }
-    quickSort(vec, l, i);
-    quickSort(vec, i, r);
+    quickSort(l, i);
+    quickSort(i, r);
 }
 
-
-void wuickSort(vector<int> &vec, int l, int r) {
-    if (l >= r) return;
-    int w = l-1;
-    for (int i = l; i <= r; ++i)
-        if ((vec[i] < vec[r] || i == r) && i != ++w)
-            swapInt(vec[i], vec[w]);
-    wuickSort(vec, l, w-1);
-    wuickSort(vec, w+1, r);
-}
 
 
 int main(int argc, char **argv) {
+
     if (argc < 2) return 0;
 
     fstream file("sorts.in");
@@ -59,19 +51,19 @@ int main(int argc, char **argv) {
     vector<int> vec(n);
     for (int i = 0; i < n; ++i) file >> vec[i];
 
+    auto t0 = chrono::high_resolution_clock::now();
     switch (argv[1][0]) {
         case 'b':
-            bubbleSort(vec, 0, vec.size());
+            bubbleSort(vec.begin(), vec.end());
             break;
         case 'q':
-            quickSort(vec, 0, vec.size());
-            break;
-        case 'w':
-            wuickSort(vec, 0, vec.size());
+            quickSort(vec.begin(), vec.end());
             break;
     }
+    auto t1 = chrono::high_resolution_clock::now();
 
-    cout << counter << endl;
+    auto ms = chrono::duration_cast<chrono::milliseconds> (t1-t0);
+    cout << ms.count() << " ms" << endl;
 
     return !is_sorted(vec.begin(), vec.end());
 }
