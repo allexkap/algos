@@ -10,11 +10,11 @@ using namespace std;
 template <typename it>
 void bubbleSort(it l, it r) {
     bool s;
-    for (size_t j = 1; j < r-l; ++j, s = 0) {
+    for (size_t j = 1; j < r-l; ++j, s = false) {
         for (it i = l; i < r-j; ++i) {
             if (*i > *(i+1)) {
                 swap(*i, *(i+1));
-                s = 1;
+                s = true;
             }
         }
         if (!s) break;
@@ -35,6 +35,29 @@ void quickSort(it l, it r) {
     }
     quickSort(l, i);
     quickSort(i, r);
+}
+
+
+template <typename it>
+void heapify(it l, it r, it i) {
+    while (1) {
+        it m = i, c = l + 2*(i-l);
+        if (c+1 < r && *(c+1) > *m) m = c+1;
+        if (c+2 < r && *(c+2) > *m) m = c+2;
+        if (m == i) break;
+        swap(*i, *m);
+        i = m;
+    }
+}
+
+template <typename it>
+void heapSort(it l, it r) {
+    for (it i = l + (r-l-1)/2; i > l; --i)
+        heapify(l, r, i);
+    for (; r-l >= 2; --r) {
+        heapify(l, r, l);
+        swap(*l, *(r-1));
+    }
 }
 
 
@@ -59,11 +82,14 @@ int main(int argc, char **argv) {
         case 'q':
             quickSort(vec.begin(), vec.end());
             break;
+        case 'h':
+            heapSort(vec.begin(), vec.end());
+            break;
     }
     auto t1 = chrono::high_resolution_clock::now();
 
-    auto ms = chrono::duration_cast<chrono::milliseconds> (t1-t0);
-    cout << ms.count() << " ms" << endl;
+    auto ms = chrono::duration_cast<chrono::microseconds> (t1-t0);
+    cout << ms.count() << " µs" << endl;
 
     return !is_sorted(vec.begin(), vec.end());
 }
