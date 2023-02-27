@@ -8,6 +8,14 @@ using namespace std;
 
 
 template <typename it>
+void gnomeSort(it l, it r) {
+    for (it i = l; i < r; )
+        if (i == l || *(i-1) <= *i) ++i;
+        else swap(*i, *--i);
+}
+
+
+template <typename it>
 void bubbleSort(it l, it r) {
     bool swapped;
     for (size_t j = 1; j < r-l; ++j, swapped = false) {
@@ -95,6 +103,9 @@ int main(int argc, char **argv) {
 
     auto t0 = chrono::high_resolution_clock::now();
     switch (argv[1][0]) {
+        case 'g':
+            gnomeSort(vec.begin(), vec.end());
+            break;
         case 'b':
             bubbleSort(vec.begin(), vec.end());
             break;
