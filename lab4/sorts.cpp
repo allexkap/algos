@@ -9,15 +9,15 @@ using namespace std;
 
 template <typename it>
 void bubbleSort(it l, it r) {
-    bool s;
-    for (size_t j = 1; j < r-l; ++j, s = false) {
+    bool swapped;
+    for (size_t j = 1; j < r-l; ++j, swapped = false) {
         for (it i = l; i < r-j; ++i) {
             if (*i > *(i+1)) {
                 swap(*i, *(i+1));
-                s = true;
+                swapped = true;
             }
         }
-        if (!s) break;
+        if (!swapped) break;
     }
 }
 
@@ -61,6 +61,25 @@ void heapSort(it l, it r) {
 }
 
 
+template <typename it>
+void combSort(it l, it r, double shrink=1.3) {
+    size_t gap = r-l;
+    bool swapped = true;
+    while (swapped) {
+        if (gap > 1)
+            gap /= shrink;
+        else
+            swapped = false;
+        for (it i = l; i < r-gap; ++i) {
+            if (*i > *(i+gap)) {
+                swap(*i, *(i+gap));
+                swapped = true;
+            }
+        }
+    }
+}
+
+
 
 int main(int argc, char **argv) {
 
@@ -85,11 +104,14 @@ int main(int argc, char **argv) {
         case 'h':
             heapSort(vec.begin(), vec.end());
             break;
+        case 'c':
+            combSort(vec.begin(), vec.end());
+            break;
     }
     auto t1 = chrono::high_resolution_clock::now();
 
-    auto ms = chrono::duration_cast<chrono::microseconds> (t1-t0);
-    cout << ms.count() << " µs" << endl;
+    auto dt = chrono::duration_cast<chrono::microseconds> (t1-t0);
+    cout << dt.count() << " µs" << endl;
 
     return !is_sorted(vec.begin(), vec.end());
 }
