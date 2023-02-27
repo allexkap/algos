@@ -11,7 +11,7 @@ template <typename it>
 void gnomeSort(it l, it r) {
     for (it i = l; i < r; )
         if (i == l || *(i-1) <= *i) ++i;
-        else swap(*i, *--i);
+        else swap(*--i, *i);
 }
 
 
