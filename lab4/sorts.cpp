@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include "counter.cpp"
 using namespace std;
 
@@ -32,8 +33,19 @@ void bubbleSort(it l, it r) {
 
 
 template <typename it>
-void quickSort(it l, it r) {
-    if (r-l < 2) return;
+void insertionSort(it l, it r) {
+    for (it j, i = l+1; i < r; ++i) {
+        auto t = *i;
+        for (j = i; j > l && *(j-1) > t; --j)
+            *j = *(j-1);
+        *j = t;
+        counter::xors += (i-j)/3;
+    }
+}
+
+
+template <typename it>
+it partition(it l, it r) {
     auto p = *(l+(r-l)/2);
     it i = l, j = r-1;
     while (1) {
@@ -42,6 +54,13 @@ void quickSort(it l, it r) {
         if (i < j) counter::swap(*i++, *j--);
         else break;
     }
+    return i;
+}
+
+template <typename it>
+void quickSort(it l, it r) {
+    if (r-l < 2) return;
+    it i = partition(l, r);
     quickSort(l, i);
     quickSort(i, r);
 }
@@ -89,6 +108,23 @@ void combSort(it l, it r, double shrink=1.3) {
 }
 
 
+template <typename it>
+void introSort(it l, it r, int depth, int chunk) {
+    if (r-l < chunk) insertionSort(l, r);
+    else if (depth) {
+        it i = partition(l, r);
+        introSort(l, i, depth-1, chunk);
+        introSort(i, r, depth-1, chunk);
+    }
+    else heapSort(l, r);
+}
+
+template <typename it>
+void introSort(it l, it r) {
+    introSort(l, r, log2(r-l), 128);
+}
+
+
 
 int main(int argc, char **argv) {
 
@@ -110,6 +146,9 @@ int main(int argc, char **argv) {
         case 'b':
             bubbleSort(vec.begin(), vec.end());
             break;
+        case 'I':
+            insertionSort(vec.begin(), vec.end());
+            break;
         case 'q':
             quickSort(vec.begin(), vec.end());
             break;
@@ -118,6 +157,9 @@ int main(int argc, char **argv) {
             break;
         case 'c':
             combSort(vec.begin(), vec.end());
+            break;
+        case 'i':
+            introSort(vec.begin(), vec.end());
             break;
     }
     auto t1 = chrono::high_resolution_clock::now();
