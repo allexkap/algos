@@ -13,7 +13,7 @@ template <typename it>
 void gnomeSort(it l, it r) {
     for (it i = l; i < r; )
         if (i == l || *(i-1) <= *i) ++i;
-        else counter::swap(*(i-1), *i), --i;
+        else swap(*(i-1), *i), --i;
 }
 
 
@@ -23,7 +23,7 @@ void bubbleSort(it l, it r) {
     for (size_t j = 1; j < r-l; ++j, swapped = false) {
         for (it i = l; i < r-j; ++i) {
             if (*i > *(i+1)) {
-                counter::swap(*i, *(i+1));
+                swap(*i, *(i+1));
                 swapped = true;
             }
         }
@@ -39,7 +39,6 @@ void insertionSort(it l, it r) {
         for (j = i; j > l && *(j-1) > t; --j)
             *j = *(j-1);
         *j = t;
-        counter::xors += (i-j)/3;
     }
 }
 
@@ -51,7 +50,7 @@ it partition(it l, it r) {
     while (1) {
         while (*i < p) ++i;
         while (*j > p) --j;
-        if (i < j) counter::swap(*i++, *j--);
+        if (i < j) swap(*i++, *j--);
         else break;
     }
     return i;
@@ -73,7 +72,7 @@ void heapify(it l, it r, it i) {
         if (c+1 < r && *(c+1) > *m) m = c+1;
         if (c+2 < r && *(c+2) > *m) m = c+2;
         if (m == i) break;
-        counter::swap(*i, *m);
+        swap(*i, *m);
         i = m;
     }
 }
@@ -84,7 +83,7 @@ void heapSort(it l, it r) {
         heapify(l, r, i);
     for (; r-l >= 2; --r) {
         heapify(l, r, l);
-        counter::swap(*l, *(r-1));
+        swap(*l, *(r-1));
     }
 }
 
@@ -100,7 +99,7 @@ void combSort(it l, it r, double shrink=1.3) {
             swapped = false;
         for (it i = l; i < r-gap; ++i) {
             if (*i > *(i+gap)) {
-                counter::swap(*i, *(i+gap));
+                swap(*i, *(i+gap));
                 swapped = true;
             }
         }
@@ -130,12 +129,12 @@ int main(int argc, char **argv) {
 
     if (argc < 2) return 0;
 
-    fstream file("sorts.in");
+    ifstream file("sorts.in");
 
     int n;
     file >> n;
 
-    vector<int> vec(n);
+    vector<Int> vec(n);
     for (int i = 0; i < n; ++i) file >> vec[i];
 
     auto t0 = chrono::high_resolution_clock::now();
@@ -165,8 +164,9 @@ int main(int argc, char **argv) {
     auto t1 = chrono::high_resolution_clock::now();
 
     auto dt = chrono::duration_cast<chrono::microseconds> (t1-t0);
-    cout << counter::xors << " xors" << endl;
     cout << dt.count() << " µs" << endl;
+    cout << Int::asg << " =" << endl;
+    cout << Int::cmp << " ?" << endl;
 
     return !is_sorted(vec.begin(), vec.end());
 }
