@@ -120,7 +120,36 @@ void introSort(it l, it r, int depth, int chunk) {
 
 template <typename it>
 void introSort(it l, it r) {
-    introSort(l, r, log2(r-l), 128);
+    introSort(l, r, log2(r-l), 16);
+}
+
+
+template <typename it>
+void merge(it l, it m, it r, it k) {
+    it i = l, j = m;
+    while (i < m && j < r)
+        if (*i < *j) *k++ = *i++;
+        else *k++ = *j++;
+
+    while (i < m) *k++ = *i++;
+    while (j < r) *k++ = *j++;
+    while (l < r) *--r = *--k;
+}
+
+template <typename it>
+void mergeSort(it l, it r, it k) {
+    if (r-l < 2) return;
+    it m = l+(r-l)/2;
+    mergeSort(l, m, k);
+    mergeSort(m, r, k);
+    if (*(m-1) > *m)
+        merge(l, m, r, k);
+}
+
+template <typename it>
+void mergeSort(it l, it r) {
+    vector<typeof(*l)> v(r-l);
+    mergeSort(l, r, v.begin());
 }
 
 
@@ -159,6 +188,9 @@ int main(int argc, char **argv) {
             break;
         case 'i':
             introSort(vec.begin(), vec.end());
+            break;
+        case 'm':
+            mergeSort(vec.begin(), vec.end());
             break;
     }
     auto t1 = chrono::high_resolution_clock::now();
