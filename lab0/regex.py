@@ -1,33 +1,35 @@
-pattern = '(.+AB((C|D*E)F)*G)'
+def getTransitions(pattern):
+    transitions = []
+    stack = []
+    prev = 0
 
-moves = []
-stack = []
-prev = 0
+    for i, p in enumerate(pattern):
+        transitions.append([i+1])
 
-for i, p in enumerate(pattern):
-    moves.append([i+1])
-
-    if p == '(':
-        stack.append([i, []])
-
-    if p == '|':
-        moves[-1].pop()
-        moves[stack[-1][0]].append(i+1)
-        stack[-1][1].append(moves[-1])
-
-    if p == '+':
-        moves[-1].append(prev)
-
-    if p == '*':
-        moves[-1].append(prev)
-        moves[prev].append(i)
-
-    if p == ')':
-        while stack[-1][1]:
-            stack[-1][1].pop().append(i)
-        prev = stack.pop()[0]
-    else:
+        match p:
+            case '(':
+                stack.append([i, []])    
+            case '|':
+                transitions[-1].pop()
+                transitions[stack[-1][0]].append(i+1)
+                stack[-1][1].append(transitions[-1])
+            case '?':
+                transitions[-1].append(i)
+            case '+':
+                transitions[-1].append(prev)
+            case '*':
+                transitions[-1].append(prev)
+                transitions[prev].append(i)
+            case ')':
+                while stack[-1][1]:
+                    stack[-1][1].pop().append(i)
+                prev = stack.pop()[0]
+                continue
         prev = i
 
+    return transitions
 
-print('\n'.join(f'{i} -> {", ".join(map(str, j))}' for i, j in enumerate(moves)))
+
+pattern = '(.+AB((C|D*E)F)*G)'
+transitions = getTransitions(pattern)
+print('\n'.join(f'{i} -> {", ".join(map(str, j))}' for i, j in enumerate(transitions)))
