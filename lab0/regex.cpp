@@ -8,19 +8,18 @@ using namespace std;
 
 
 struct Vertex {
+    char label;
     set<Vertex*> jumps;
+    Vertex(char ch) : label(ch) {}
     virtual bool cnd(char) const {
         abort();
     }
-    char id; Vertex(char ch) : id(ch) {} // debug
 };
 
 
 struct Letter : Vertex {
-    char label;
-    Letter(char ch) : Vertex(ch), label(ch) {}
+    Letter(char ch) : Vertex(ch) {}
     bool cnd(char ch) const override {
-        cout << '!' << label << ':' << ch << '\n';
         return ch == label;
     }
 };
@@ -141,17 +140,26 @@ int main() {
     Group(graph[0]).connect(group);
     group.connect(graph.back());
 
-    cout << "Graph:" << endl;
+
+    for (auto &v: graph)
+        for (auto &j: v->jumps)
+            cout << v->label << ' ' << j->label << endl;
+
+    cout << endl <<"Graph" << endl;
     for (auto &v: graph) {
-        cout << v->id << " : ";
-        for (auto &j: v->jumps) cout << j->id << ' ';
+        cout << v->label << " : ";
+        for (auto &j: v->jumps) cout << j->label << ' ';
         cout << endl;
     }
-    cout << endl << endl;
+    cout << endl;
 
 
     set<Vertex*> active, dead;
     active.insert(graph[0]->jumps.begin(), graph[0]->jumps.end());
+
+    cout << "Stages" << endl << "[ : ";
+    for (auto &v: active) cout << v->label << ' ';
+    cout << endl;
 
     for (auto &ch: text) {
         dead = active;
@@ -162,14 +170,15 @@ int main() {
             }
         }
 
-        cout << "Active: ";
-        for (auto &v: active) cout << v->id << ' ';
-        cout << endl << endl;
+        cout << ch << " : ";
+        for (auto &v: active) cout << v->label << ' ';
+        cout << endl;
 
         if (!active.size()) break;
     }
 
 
+    cout << endl;
     if (active.find(graph.back()) != active.end()) cout << "Yes\n";
     else cout << "No\n";
 
