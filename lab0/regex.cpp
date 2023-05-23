@@ -150,7 +150,7 @@ int main() {
     graph.push_back(new Origin);
     auto group = handle_group(graph, it);
     graph.push_back(new Finish);
-    Group(graph[0]).connect(group);
+    Group(graph.front()).connect(group);
     group.connect(graph.back());
 
 
@@ -168,7 +168,7 @@ int main() {
 
 
     set<Vertex*> active, dead;
-    active.insert(graph[0]->jumps.begin(), graph[0]->jumps.end());
+    active.insert(graph.front()->jumps.begin(), graph.front()->jumps.end());
 
     cout << "Stages" << endl << "[ : ";
     for (auto &v: active) cout << v->label << ' ';
