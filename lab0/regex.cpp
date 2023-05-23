@@ -51,11 +51,7 @@ struct Group {
     Group (Vertex *vertex) : inputs{vertex}, outputs{vertex} {};
 
     Group& operator=(Vertex *vertex) {
-        inputs.clear();
-        outputs.clear();
-        inputs.insert(vertex);
-        outputs.insert(vertex);
-        transparent = false;
+        *this = Group(vertex);
         return *this;
     }
 
@@ -65,6 +61,15 @@ struct Group {
             v->jumps.insert(other.inputs.begin(), other.inputs.end());
         }
         return true;
+    }
+
+    void join(const Group &other, char side) {
+        if (side == 'i') {
+            inputs.insert(other.inputs.begin(), other.inputs.end());
+        }
+        else {
+            outputs.insert(other.outputs.begin(), other.outputs.end());
+        }
     }
 };
 
@@ -77,49 +82,42 @@ Group handle_group(vector<Vertex*> &graph, string::iterator &pattern) {
         if (*pattern == '(') {
             previous = current;
             current = handle_group(graph, ++pattern);
-            if (!previous.connect(current)) {
-                result.inputs.insert(current.inputs.begin(), current.inputs.end());
-            }
+            if (!previous.connect(current))
+                result.join(current, 'i');
         }
         else if (*pattern == '|') {
-            result.outputs.insert(current.outputs.begin(), current.outputs.end());
+            result.join(current, 'o');
             current.outputs.clear();
         }
         else if (*pattern == '+') {
             current.connect(current);
         }
         else if (*pattern == '?') {
-            if (previous.outputs.empty()) {
+            if (!previous.outputs.empty())
+                current.join(previous, 'o');
+            else
                 current.transparent = true;
-            }
-            else {
-                current.outputs.insert(previous.outputs.begin(), previous.outputs.end());
-            }
         }
         else if (*pattern == '*') {
-            if (previous.outputs.empty()) {
+            if (!previous.outputs.empty())
+                current.join(previous, 'o');
+            else
                 current.transparent = true;
-            }
-            else {
-                current.outputs.insert(previous.outputs.begin(), previous.outputs.end());
-            }
             current.connect(current);
         }
         else {
             graph.push_back(new Letter(*pattern));
             previous = current;
             current = graph.back();
-            if (!previous.connect(current)) {
-                result.inputs.insert(current.inputs.begin(), current.inputs.end());
-            }
+            if (!previous.connect(current))
+                result.join(current, 'i');
         }
-        if (previous.transparent) {
-            result.inputs.insert(current.inputs.begin(), current.inputs.end());
-        }
+        if (previous.transparent)
+            result.join(current, 'i');
         ++pattern;
     }
 
-    result.outputs.insert(current.outputs.begin(), current.outputs.end());
+    result.join(current, 'o');
     return result;
 }
 
@@ -134,9 +132,9 @@ int main() {
     vector<Vertex*> graph;
     auto it = pattern.begin();
 
-    graph.push_back(new Origin());
+    graph.push_back(new Origin);
     auto group = handle_group(graph, it);
-    graph.push_back(new Finish());
+    graph.push_back(new Finish);
     Group(graph[0]).connect(group);
     group.connect(graph.back());
 
