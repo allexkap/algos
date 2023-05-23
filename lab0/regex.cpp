@@ -25,6 +25,14 @@ struct Letter : Vertex {
 };
 
 
+struct Dot : Vertex {
+    Dot() : Vertex('.') {}
+    bool cnd(char ch) const override {
+        return true;
+    }
+};
+
+
 struct Origin : Vertex {
     Origin() : Vertex('[') {}
     bool cnd(char ch) const override {
@@ -104,6 +112,13 @@ Group handle_group(vector<Vertex*> &graph, string::iterator &pattern) {
             else
                 current.transparent = true;
             current.connect(current);
+        }
+        else if (*pattern == '.') {
+            graph.push_back(new Dot);
+            previous = current;
+            current = graph.back();
+            if (!previous.connect(current))
+                result.join(current, 'i');
         }
         else {
             graph.push_back(new Letter(*pattern));
