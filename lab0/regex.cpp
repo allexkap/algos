@@ -131,6 +131,7 @@ Group handle_group(vector<Vertex*> &graph, string::iterator &pattern) {
         ++pattern;
     }
 
+    result.transparent = current.transparent;
     result.join(current, 'o');
     return result;
 }
@@ -149,6 +150,8 @@ int main() {
     graph.push_back(new Origin);
     auto group = handle_group(graph, it);
     graph.push_back(new Finish);
+    if (group.transparent)
+        group.inputs.insert(graph.back());
     Group(graph.front()).connect(group);
     group.connect(graph.back());
 
