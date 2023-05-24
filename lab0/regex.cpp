@@ -101,16 +101,10 @@ Group handle_group(vector<Vertex*> &graph, string::iterator &pattern) {
             current.connect(current);
         }
         else if (*pattern == '?') {
-            if (!previous.outputs.empty())
-                current.join(previous, 'o');
-            else
-                current.transparent = true;
+            current.transparent = true;
         }
         else if (*pattern == '*') {
-            if (!previous.outputs.empty())
-                current.join(previous, 'o');
-            else
-                current.transparent = true;
+            current.transparent = true;
             current.connect(current);
         }
         else if (*pattern == '.') {
@@ -126,6 +120,11 @@ Group handle_group(vector<Vertex*> &graph, string::iterator &pattern) {
             current = graph.back();
             if (!previous.connect(current))
                 result.join(current, 'i');
+        }
+
+        if (current.transparent && !previous.outputs.empty()) {
+            current.transparent = false;
+            current.join(previous, 'o');
         }
         if (previous.transparent)
             result.join(current, 'i');
