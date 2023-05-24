@@ -33,6 +33,14 @@ struct Dot : Vertex {
 };
 
 
+struct Digit : Vertex {
+    Digit() : Vertex('d') {}
+    bool cnd(char ch) const override {
+        return '0' <= ch && ch <= '9';
+    }
+};
+
+
 struct Origin : Vertex {
     Origin() : Vertex('[') {}
     bool cnd(char ch) const override {
@@ -85,9 +93,25 @@ struct Group {
 
 Group handle_group(vector<Vertex*> &graph, string::iterator &pattern) {
     Group current, previous, result;
+    Vertex *vertex = nullptr;
 
-    while (*pattern && *pattern != ')') {
-        if (*pattern == '(') {
+    while (*pattern) {
+        if (*pattern == '\\') {
+            switch (*++pattern) {
+                case '\0':
+                    break;
+                case 'd':
+                    vertex = new Digit;
+                    break;
+                default:
+                    vertex = new Letter(*pattern);
+                    break;
+            }
+        }
+        else if (*pattern == ')') {
+            break;
+        }
+        else if (*pattern == '(') {
             previous = current;
             current = handle_group(graph, ++pattern);
             if (!previous.connect(current))
@@ -108,14 +132,15 @@ Group handle_group(vector<Vertex*> &graph, string::iterator &pattern) {
             current.connect(current);
         }
         else if (*pattern == '.') {
-            graph.push_back(new Dot);
-            previous = current;
-            current = graph.back();
-            if (!previous.connect(current))
-                result.join(current, 'i');
+            vertex = new Dot;
         }
         else {
-            graph.push_back(new Letter(*pattern));
+            vertex = new Letter(*pattern);
+        }
+
+        if (vertex) {
+            graph.push_back(vertex);
+            vertex = nullptr;
             previous = current;
             current = graph.back();
             if (!previous.connect(current))
